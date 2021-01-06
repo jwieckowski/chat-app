@@ -8,6 +8,7 @@ const io = require('socket.io')(httpServer)
 app.use(express.static(__dirname + '/src'))
 
 const users = {}
+const roomMessages = {}
 
 io.on('connection', socket => {
 

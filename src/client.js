@@ -15,8 +15,12 @@ socket.on('chat-message', data => {
 
 socket.on('user-connected', data => {
     const newUsers = Object.values(data.users).filter(name => name !== newUser && !activeUsers.includes(name))
-    newUsers.map(name => appendUser(name))
-    activeUsers = newUsers
+    newUsers.map(name => {
+        appendUser(name)
+        activeUsers.push(name)
+    })
+
+    checkActiveUsers()
 })
 
 socket.on('user-disconnected', name => {
@@ -24,6 +28,8 @@ socket.on('user-disconnected', name => {
     user.getElementsByTagName('span')[0].classList.remove('active')
     user.getElementsByTagName('span')[0].classList.add('inactive')
     
+    checkActiveUsers()
+
     setTimeout(() => {
         user.parentNode.removeChild(user)
     }, 5000)
@@ -32,6 +38,7 @@ socket.on('user-disconnected', name => {
 messageForm.addEventListener('submit', e => {
     e.preventDefault()
     const message = messageInput.value
+    if (message === '') return 
     appendMessage({ name: 'You', message: message})
     socket.emit('send-chat-message', message)
     messageInput.value = ''
@@ -49,6 +56,7 @@ function appendMessage (data) {
 
     messageElement.innerText = `${data.name}: ${data.message}`
     messageContainer.append(messageElement)
+    messageContainer.scrollTop = messageContainer.scrollHeight
 }
 
 function appendUser (user) {
@@ -64,4 +72,15 @@ function appendUser (user) {
     userElement.innerHTML += ` ${user}`
 
     userContainer.append(userElement)
+}
+
+function checkActiveUsers () {
+    const server = document.getElementById('server')
+    if (activeUsers.length !== 0) {
+        server.classList.remove('inactive')
+        server.classList.add('active')
+    } else {
+        server.classList.remove('active')
+        server.classList.add('inactive')
+    }
 }

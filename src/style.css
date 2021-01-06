@@ -15,6 +15,7 @@ body {
 #users-container {
   width: 30%;
   height: 100%;
+  overflow: auto;
 }
 
 #conversation-container {
@@ -40,6 +41,10 @@ body {
 #message-input, #send-button {
   padding: 2% 5%;
   font-size: 20px;
+}
+
+#send-button:hover {
+  cursor: pointer;
 }
 
 .user {
@@ -88,8 +93,12 @@ body {
 
 .sender-message {
   background-color: skyblue;
+  max-width: 60%;
+  margin-left: 30%;
+  text-align: end;
 }
 
 .receiver-message {
   background-color: silver;
+  max-width: 60%;
 }
