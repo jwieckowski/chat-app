@@ -8,19 +8,17 @@ const io = require('socket.io')(httpServer)
 app.use(express.static(__dirname + '/src'))
 
 const users = {}
-const roomMessages = {}
 
 io.on('connection', socket => {
 
   socket.emit('chat-message', 
   {
     message: 'Welcome to chat',
-    name: 'Server'
+    name: 'server'
   })
   
   socket.on('new-user', name => {
     users[socket.id] = name
-    // socket.broadcast.emit('user-connected', name) // to all users 
     socket.emit('user-connected', {
       users: users,
       name: name
@@ -36,12 +34,13 @@ io.on('connection', socket => {
     delete users[socket.id]
   })
   
-  socket.on('send-chat-message', message => {
-    socket.broadcast.emit('chat-message',
-    {
+  socket.on('send-chat-message', ({message}) => {
+    const chatMessage = {
       message: message,
       name: users[socket.id]
-    }) // to every other client but not to the one who send
+    }
+
+    socket.broadcast.emit('chat-message', chatMessage) // to every other client but not to the one who send
   })
 })
 

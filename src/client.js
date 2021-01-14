@@ -5,6 +5,7 @@ const messageForm = document.getElementById('send-container')
 const messageInput = document.getElementById('message-input')
 
 let activeUsers = []
+
 const newUser = prompt('What is your name?')
 appendUser('You')
 socket.emit('new-user', newUser)
@@ -28,10 +29,10 @@ socket.on('user-disconnected', name => {
     user.getElementsByTagName('span')[0].classList.remove('active')
     user.getElementsByTagName('span')[0].classList.add('inactive')
     
-    checkActiveUsers()
-
     setTimeout(() => {
         user.parentNode.removeChild(user)
+        activeUsers = activeUsers.filter(user => user !== name)
+        checkActiveUsers()
     }, 5000)
 })
 
@@ -70,7 +71,7 @@ function appendUser (user) {
     userElement.setAttribute('id', user)
     userElement.classList.add('user')
     userElement.innerHTML += ` ${user}`
-
+    
     userContainer.append(userElement)
 }
 
