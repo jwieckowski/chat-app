@@ -4,14 +4,19 @@ const messageContainer = document.getElementById('messages-container')
 const messageForm = document.getElementById('send-container')
 const messageInput = document.getElementById('message-input')
 
+let currentReceiver = 'server'
+let currentConversation = []
 let activeUsers = []
 
 const newUser = prompt('What is your name?')
+appendUser('server')
 appendUser('You')
 socket.emit('new-user', newUser)
 
-socket.on('chat-message', data => {
-    appendMessage(data)
+socket.on('chat-message', ({data, key}) => {
+    if (key === getActiveKey(currentReceiver) || data.name === 'server') {
+        appendMessage(data)
+    }
 })
 
 socket.on('user-connected', data => {
@@ -22,6 +27,10 @@ socket.on('user-connected', data => {
     })
 
     checkActiveUsers()
+
+    data.messages && data.messages.map(m => {
+        appendMessage(m)
+    })
 })
 
 socket.on('user-disconnected', name => {
@@ -36,12 +45,26 @@ socket.on('user-disconnected', name => {
     }, 5000)
 })
 
+socket.on('room-conversation', messages => {
+    currentConversation = messages
+    messageContainer.innerHTML = ''
+    currentConversation.map(m => {
+        m.name = m.name === newUser
+          ? 'You'
+          : m.name
+        appendMessage(m)
+    })
+})
+
 messageForm.addEventListener('submit', e => {
     e.preventDefault()
     const message = messageInput.value
     if (message === '') return 
     appendMessage({ name: 'You', message: message})
-    socket.emit('send-chat-message', message)
+    socket.emit('send-chat-message', {
+        message: message,
+        key: getActiveKey(currentReceiver)
+    })
     messageInput.value = ''
 })
 
@@ -71,6 +94,17 @@ function appendUser (user) {
     userElement.setAttribute('id', user)
     userElement.classList.add('user')
     userElement.innerHTML += ` ${user}`
+
+    userElement.addEventListener('click', (e) => {
+        e.preventDefault()
+
+        if (user === 'You') return
+
+        // if (userElement.classList.contains('user-message')) userElement.classList.remove('user-message')
+
+        currentReceiver = user
+        socket.emit('switch-room', {key: getActiveKey(user)})
+    })
     
     userContainer.append(userElement)
 }
@@ -84,4 +118,9 @@ function checkActiveUsers () {
         server.classList.remove('active')
         server.classList.add('inactive')
     }
+}
+
+function getActiveKey (user) {
+    const mixed = [user, newUser].sort().join()
+    return currentReceiver === 'server' ? 'server' : mixed
 }

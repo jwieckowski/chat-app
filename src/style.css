@@ -60,6 +60,10 @@ body {
   justify-content: flex-start;
 }
 
+.user-message {
+  border-bottom: 2px solid lime;
+}
+
 .user:hover {
   box-shadow: 10px 5px 5px black;
 }
