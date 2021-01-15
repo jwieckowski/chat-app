@@ -12,6 +12,10 @@ I was using:
 * CSS
 * HTML
 
+## Functionalities
+* Server chat available for all users
+* Possibility to have a private chat with active user
+
 ## Setup
 
 To run the application, use the following command:
